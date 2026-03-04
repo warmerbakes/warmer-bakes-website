@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Warmer Bakes & Cakes — Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #fff;
+    color: #111;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 56px;
+    border-bottom: 1px solid #e8e8e8;
+    background: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .topbar-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+  .topbar-logo span { color: #aaa; font-weight: 400; margin-left: 4px; font-size: 0.9rem; }
+
+  .topbar-nav {
+    display: flex;
+    gap: 4px;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    color: #555;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+  }
+  .nav-link:hover { background: #f4f4f4; color: #111; }
+  .nav-link.active { background: #111; color: #fff; }
+
+  .nav-icon { font-size: 0.9rem; }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .topbar-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: #111;
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+  }
+
+  .topbar-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+  }
+
+  /* hamburger */
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+  }
+  .hamburger span {
+    display: block;
+    width: 20px; height: 2px;
+    background: #111;
+    border-radius: 2px;
+    transition: 0.2s;
+  }
+
+  /* mobile nav */
+  .mobile-nav {
+    display: none;
+    flex-direction: column;
+    background: #fff;
+    border-bottom: 1px solid #e8e8e8;
+    padding: 8px 16px;
+  }
+  .mobile-nav a {
+    padding: 10px 0;
+    font-size: 0.9rem;
+    color: #333;
+    text-decoration: none;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .mobile-nav.open { display: flex; }
+
+  @media (max-width: 768px) {
+    .topbar-nav { display: none; }
+    .hamburger { display: flex; }
+  }
+
+  /* ── PAGE CONTENT ── */
+  .page-content {
+    padding: 32px 24px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  /* ── DASHBOARD ── */
+  .dash-greeting {
+    margin-bottom: 32px;
+  }
+  .dash-greeting h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+  .dash-greeting h1 em { font-style: italic; color: #555; }
+  .dash-greeting p {
+    margin-top: 6px;
+    color: #888;
+    font-size: 0.9rem;
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  @media (max-width: 600px) {
+    .stat-grid { grid-template-columns: 1fr; }
+  }
+
+  .stat-card {
+    border: 1px solid #e8e8e8;
+    border-radius: 10px;
+    padding: 20px 22px;
+    background: #fff;
+  }
+
+  .stat-card.accent {
+    background: #111;
+    border-color: #111;
+    color: #fff;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 10px;
+  }
+  .stat-card.accent .stat-label { color: #aaa; }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-style: italic;
+    line-height: 1.4;
+    margin-bottom: 6px;
+  }
+
+  .stat-sub {
+    font-size: 0.78rem;
+    color: #aaa;
+  }
+  .stat-card.accent .stat-sub { color: #666; }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<!-- TOPBAR -->
+<div class="topbar">
+
+  <!-- HAMBURGER ON LEFT -->
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+
+  <!-- LOGO -->
+  <div class="topbar-logo">Warmer Bakes & Cakes <span>Admin</span></div>
+
+  <!-- NAV -->
+  <nav class="topbar-nav">
+    <a class="nav-link active" href="/admin">
+      <span class="nav-icon">⬡</span> Dashboard
+    </a>
+    <a class="nav-link" href="/admin_add_item">
+      <span class="nav-icon">＋</span> Add Item
+    </a>
+    <a class="nav-link" href="/view_items">
+      <span class="nav-icon">◫</span> View Items
+    </a>
+    <a class="nav-link" href="/add_new_category">
+      <span class="nav-icon">＋</span> Add Product Category
+    </a>
+    <a class="nav-link" href="/contact_messages">
+      <span class="nav-icon">💬</span> Contact Messages
+    </a>
+    <a class="nav-link" href="/" target="_blank">
+      <span class="nav-icon">🌐</span> View Website
+    </a>
+    <a class="nav-link" href="/logout" style="color:#ef4444">
+      <span class="nav-icon">⇥</span> Logout
+    </a>
+  </nav>
+
+  <!-- RIGHT SIDE -->
+  <div class="topbar-right">
+    <div class="topbar-badge">Admin</div>
+    <div class="topbar-dot"></div>
+  </div>
+
+</div>
+
+<!-- Mobile nav -->
+<div class="mobile-nav" id="mobileNav">
+  <a href="/admin"><span class="nav-icon">⬡</span> Dashboard</a>
+  <a href="/admin_add_item"><span class="nav-icon">＋</span> Add Item</a>
+  <a href="/view_items"><span class="nav-icon">◫</span> View Items</a>
+  <a href="/add_new_category"><span class="nav-icon">＋</span> Add Product Category</a>
+  <a href="/" target="_blank"><span class="nav-icon">🌐</span> View Website</a>
+  <a href="/logout" style="color:#ef4444"><span class="nav-icon">⇥</span> Logout</a>
+</div>
+
+{% block content %}
+
+{% endblock %}
+
+<script>
+  const ham = document.getElementById('hamburger');
+  const mob = document.getElementById('mobileNav');
+  ham.addEventListener('click', () => mob.classList.toggle('open'));
+</script>
+
+</body>
+</html>

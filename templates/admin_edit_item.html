@@ -1,0 +1,227 @@
+{% extends "admin_base.html" %}
+
+{% block content %}
+<style>
+  .edit-wrap {
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+  .edit-wrap h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .edit-wrap .sub { color: #999; font-size: 0.83rem; margin-bottom: 28px; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #888;
+    margin-bottom: 5px;
+  }
+  .edit-wrap input:not([type="file"]),
+  .edit-wrap select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 7px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.87rem;
+    color: #111;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.15s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .edit-wrap input:focus,
+  .edit-wrap select:focus { border-color: #111; }
+  .edit-wrap select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+  }
+  .divider { border: none; border-top: 1px solid #f0f0f0; margin: 20px 0; }
+  .section-label {
+    font-size: 0.72rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: #888; margin-bottom: 4px;
+  }
+  .section-hint { font-size: 0.75rem; color: #bbb; margin-bottom: 10px; }
+
+  #sizes-container { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+  .size-row { display: flex; gap: 8px; align-items: center; }
+  .size-row .input-wrap { flex: 1; position: relative; }
+  .size-row .input-wrap input { width: 100%; }
+  .size-row .input-wrap .field-tag {
+    position: absolute; top: -8px; left: 10px;
+    font-size: 0.6rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: #bbb; background: #fff; padding: 0 4px;
+  }
+
+  .btn-remove {
+    flex-shrink: 0; width: 34px; height: 36px;
+    border: 1px solid #e0e0e0; border-radius: 7px;
+    background: #fff; font-size: 0.9rem; color: #bbb;
+    cursor: pointer; transition: border-color 0.15s, color 0.15s;
+  }
+  .btn-remove:hover { border-color: #ef4444; color: #ef4444; }
+
+  .btn-add-size {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border: 1px dashed #ccc;
+    border-radius: 7px; background: none;
+    font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+    color: #888; cursor: pointer; margin-bottom: 4px;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .btn-add-size:hover { border-color: #111; color: #111; }
+
+  .current-img {
+    width: 80px; height: 80px; object-fit: cover;
+    border-radius: 8px; border: 1px solid #e8e8e8;
+    margin-bottom: 10px; display: block;
+  }
+  .file-label {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border: 1px dashed #ccc;
+    border-radius: 7px; cursor: pointer;
+    font-size: 0.84rem; color: #888;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .file-label:hover { border-color: #111; color: #111; }
+  .file-label input[type="file"] { display: none; }
+  .img-hint { font-size: 0.75rem; color: #bbb; margin-top: 6px; }
+
+  .btn-submit {
+    width: 100%; padding: 12px;
+    background: #111; color: #fff;
+    border: none; border-radius: 7px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; margin-top: 20px;
+    transition: background 0.15s;
+  }
+  .btn-submit:hover { background: #333; }
+  .btn-cancel {
+    display: block; text-align: center;
+    margin-top: 12px; font-size: 0.82rem;
+    color: #aaa; text-decoration: none;
+    transition: color 0.15s;
+  }
+  .btn-cancel:hover { color: #111; }
+</style>
+
+<div class="edit-wrap">
+  <h2>Edit Item</h2>
+  <p class="sub">Editing — <em>{{ item.name }}</em></p>
+
+  <form method="POST" enctype="multipart/form-data">
+
+    <div class="form-group">
+      <label>Item Name</label>
+      <input name="name" value="{{ item.name }}" required>
+    </div>
+
+    <div class="form-group">
+      <label>Category</label>
+      <select name="category">
+        {% set cats = ['cakes','cookies','breads','festive','desserts','bakes','pickles','east indian','appetizers','dips'] %}
+        {% for cat in cats %}
+        <option value="{{ cat }}" {% if item.category == cat %}selected{% endif %}>
+          {{ cat | capitalize }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <hr class="divider">
+
+    <div class="section-label">Pricing</div>
+    <div class="section-hint">
+      💡 Size is optional — enter just a price if there's only one. Leave both empty for "Price on request".
+    </div>
+
+    <div id="sizes-container">
+      {% if item.sizes %}
+        {% for s in item.sizes %}
+        <div class="size-row">
+          <div class="input-wrap">
+            <span class="field-tag">Size (optional)</span>
+            <input name="size[]" value="{{ s.size }}" placeholder="e.g. 500gm">
+          </div>
+          <div class="input-wrap">
+            <span class="field-tag">Price</span>
+            <input name="price[]" value="{{ s.price }}" placeholder="e.g. 350">
+          </div>
+          {% if not loop.first %}
+          <button type="button" class="btn-remove" onclick="this.parentElement.remove()">×</button>
+          {% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+        <!-- No sizes yet — show one blank row -->
+        <div class="size-row">
+          <div class="input-wrap">
+            <span class="field-tag">Size (optional)</span>
+            <input name="size[]" placeholder="e.g. 500gm">
+          </div>
+          <div class="input-wrap">
+            <span class="field-tag">Price</span>
+            <input name="price[]" placeholder="e.g. 350">
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    <button type="button" class="btn-add-size" onclick="addSize()">＋ Add another size/price</button>
+
+    <hr class="divider">
+
+    <div class="form-group">
+      <label>Product Image</label>
+      {% if item.image %}
+      <img class="current-img" src="{{item.image}}" alt="Current image">
+      {% endif %}
+      <label class="file-label">
+        <span>📎</span>
+        <span id="file-name">Choose a new image…</span>
+        <input type="file" name="image" accept="image/*"
+               onchange="document.getElementById('file-name').textContent = this.files[0]?.name || 'Choose a new image…'">
+      </label>
+      <p class="img-hint">Leave empty to keep the current image.</p>
+    </div>
+
+    <button type="submit" class="btn-submit">Save Changes</button>
+    <a href="{{ url_for('view_items') }}" class="btn-cancel">Cancel</a>
+
+  </form>
+</div>
+
+<script>
+function addSize() {
+  const container = document.getElementById('sizes-container');
+  const row = document.createElement('div');
+  row.className = 'size-row';
+  row.innerHTML = `
+    <div class="input-wrap">
+      <span class="field-tag">Size (optional)</span>
+      <input name="size[]" placeholder="e.g. 1Kg">
+    </div>
+    <div class="input-wrap">
+      <span class="field-tag">Price</span>
+      <input name="price[]" placeholder="e.g. 650">
+    </div>
+    <button type="button" class="btn-remove" onclick="this.parentElement.remove()">×</button>
+  `;
+  container.appendChild(row);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,644 @@
+{% extends "admin_base.html" %}
+
+{% block content %}
+
+<!-- PAGE CONTENT -->
+<div class="page-content">
+
+  <!-- Greeting -->
+  <div class="dash-greeting">
+    <h1>Hi, <em>Admin</em> 👋</h1>
+    <p>Welcome back to Warmer Bakes & Cakes — here's your overview.</p>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="stat-grid">
+
+    <div class="stat-card accent">
+      <div class="stat-label">Total Items</div>
+      <div class="stat-num">{{total_items}}</div>
+      <div class="stat-sub">Products in catalogue</div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ── GALLERY SECTION ── -->
+<section>
+<style>
+  .gallery-section {
+    max-width: 1100px;
+    margin: 0 auto 4rem;
+    padding: 0 1.5rem;
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  }
+
+  .gal-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .gal-heading-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .gal-bar {
+    width: 4px;
+    height: 36px;
+    background: linear-gradient(180deg, #111, #555);
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .gal-heading-left h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.5rem;
+    color: #111;
+    margin: 0;
+  }
+  .gal-heading-left p {
+    font-size: 0.78rem;
+    color: #555;
+    margin: 3px 0 0;
+  }
+  .gal-count-pill {
+    background: rgba(0,0,0,0.07);
+    color: #222;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 0.3rem 0.85rem;
+    border-radius: 2rem;
+    border: 1px solid rgba(0,0,0,0.18);
+  }
+
+  .gal-add-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #111;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 0.6rem 1.25rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+    transition: background 0.2s, transform 0.15s;
+  }
+  .gal-add-btn:hover { background: #444; transform: translateY(-1px); }
+
+  .gal-upload-panel {
+    background: #fafafa;
+    border: 1.5px dashed rgba(0,0,0,0.2);
+    border-radius: 1.2rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    display: none;
+    animation: galSlideDown 0.25s ease;
+  }
+  .gal-upload-panel.open { display: block; }
+  @keyframes galSlideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .gal-panel-inner {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .gal-dropzone {
+    flex: 0 0 180px;
+    height: 160px;
+    background: linear-gradient(135deg, #ebebeb, #d9d9d9);
+    border-radius: 12px;
+    border: 2px dashed rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .gal-dropzone:hover { border-color: #111; background: linear-gradient(135deg, #ddd, #c8c8c8); }
+  .gal-dropzone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .gal-dz-icon { font-size: 2rem; line-height: 1; }
+  .gal-dz-text {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #222;
+    text-align: center;
+    line-height: 1.4;
+  }
+  .gal-dz-sub { font-size: 0.67rem; color: #666; }
+
+  .gal-dz-preview {
+    position: absolute;
+    inset: 0;
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    display: none;
+    pointer-events: none;
+  }
+  .gal-dz-preview.visible { display: block; }
+  .gal-dz-change {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.65);
+    color: white;
+    font-size: 0.65rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    display: none;
+    white-space: nowrap;
+  }
+  .gal-dropzone:hover .gal-dz-change { display: block; }
+
+  .gal-panel-right {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .gal-field-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #555;
+    margin-bottom: 4px;
+    display: block;
+  }
+  .gal-name-input {
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    color: #111;
+    background: white;
+    border: 1.5px solid #ccc;
+    border-radius: 10px;
+    padding: 0.62rem 0.95rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+  }
+  .gal-name-input:focus {
+    border-color: #111;
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.1);
+  }
+  .gal-panel-hint {
+    font-size: 0.75rem;
+    color: #777;
+    line-height: 1.5;
+  }
+  .gal-panel-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+  }
+  .gal-btn-save {
+    flex: 1;
+    padding: 0.62rem;
+    border-radius: 9px;
+    border: none;
+    background: linear-gradient(135deg, #111, #444);
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.15s;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.2);
+  }
+  .gal-btn-save:hover { box-shadow: 0 5px 18px rgba(0,0,0,0.3); transform: translateY(-1px); }
+  .gal-btn-cancel {
+    padding: 0.62rem 1rem;
+    border-radius: 9px;
+    border: 1.5px solid #ccc;
+    background: none;
+    color: rgb(55, 53, 53);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .gal-btn-cancel:hover { border-color: black; color: black; }
+
+  .gal-masonry {
+    columns: 4;
+    column-gap: 1rem;
+  }
+  .success-alert {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #222;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+    z-index: 1000;
+    border-left: 4px solid #888;
+  }
+  @media (max-width: 900px) { .gal-masonry { columns: 3; } }
+  @media (max-width: 600px) { .gal-masonry { columns: 2; } }
+
+  .gal-item {
+    break-inside: avoid;
+    margin-bottom: 1rem;
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+    background: linear-gradient(135deg, #ccc, #888);
+  }
+  .gal-item img {
+    width: 100%;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+  .gal-item:hover img { transform: scale(1.04); }
+
+  .gal-item-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.78) 0%, transparent 100%);
+    padding: 1.5rem 0.85rem 0.75rem;
+    transform: translateY(4px);
+    transition: transform 0.3s;
+  }
+  .gal-item:hover .gal-item-overlay { transform: translateY(0); }
+  .gal-item-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: white;
+    line-height: 1.3;
+  }
+
+  /* ── Action buttons (top corners, appear on hover) ── */
+  .card-actions {
+    position: absolute;
+    top: 8px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 8px;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .gal-item:hover .card-actions { opacity: 1; }
+  .card-actions form { margin: 0; padding: 0; }
+
+  .btn-delete {
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    background: rgba(239, 68, 68, 0.9);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    transition: all 0.15s;
+  }
+  .btn-delete:hover { background: #ef4444; transform: scale(1.05); }
+
+  .btn-edit {
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    background: rgba(30, 30, 30, 0.85);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    transition: all 0.15s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .btn-edit:hover { background: #000; transform: scale(1.05); }
+
+  /* ── Edit modal ── */
+  .edit-modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+  }
+  .edit-modal-backdrop.open { display: flex; }
+
+  .edit-modal {
+    background: #fff;
+    border-radius: 16px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: modalPop 0.2s ease;
+  }
+  @keyframes modalPop {
+    from { opacity: 0; transform: scale(0.95); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  .edit-modal h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    color: #111;
+    margin: 0 0 1.25rem;
+  }
+  .edit-modal-field { margin-bottom: 1rem; }
+  .edit-modal-field label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #555;
+    display: block;
+    margin-bottom: 5px;
+  }
+  .edit-modal-field input[type="text"],
+  .edit-modal-field input[type="file"] {
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: #111;
+    background: #fafafa;
+    border: 1.5px solid #ccc;
+    border-radius: 9px;
+    padding: 0.6rem 0.9rem;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .edit-modal-field input[type="text"]:focus {
+    border-color: #111;
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.08);
+  }
+  .edit-modal-field input[type="file"] { padding: 0.45rem 0.9rem; cursor: pointer; }
+  .edit-modal-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 1.5rem;
+  }
+  .edit-modal-save {
+    flex: 1;
+    padding: 0.65rem;
+    border-radius: 9px;
+    border: none;
+    background: linear-gradient(135deg, #111, #444);
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.18);
+    transition: box-shadow 0.2s, transform 0.15s;
+  }
+  .edit-modal-save:hover { box-shadow: 0 5px 18px rgba(0,0,0,0.28); transform: translateY(-1px); }
+  .edit-modal-cancel {
+    padding: 0.65rem 1rem;
+    border-radius: 9px;
+    border: 1.5px solid #ccc;
+    background: none;
+    color: #444;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .edit-modal-cancel:hover { border-color: #111; color: #111; }
+
+  .gal-empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #777;
+    font-family: 'Cormorant Garamond', serif;
+    column-span: all;
+  }
+  .gal-empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.4; }
+  .gal-empty-text { font-size: 1.15rem; margin-bottom: 0.4rem; color: #333; }
+  .gal-empty-sub { font-size: 0.85rem; opacity: 0.6; }
+  .success-alert {
+    position: fixed; top: 20px; right: 20px;
+    background: #16a34a; color: white;
+    padding: 12px 18px; border-radius: 8px;
+    font-size: 0.85rem; font-weight: 500;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 1000;
+  }
+  .error-alert {
+    position: fixed; top: 20px; right: 20px;
+    background: #dc2626; color: white;
+    padding: 12px 18px; border-radius: 8px;
+    font-size: 0.85rem; font-weight: 500;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 1000;
+  }
+</style>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+  {% if category == 'success' %}
+  <div class="alert success-alert" id="flashAlert">{{ message }}</div>
+  {% elif category == 'error' %}
+  <div class="alert error-alert" id="flashAlert">{{ message }}</div>
+  {% endif %}
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<div class="gallery-section">
+
+  <!-- Heading row -->
+  <div class="gal-heading">
+    <div class="gal-heading-left">
+      <div class="gal-bar"></div>
+      <div>
+        <h2>Food Gallery</h2>
+        <p>Showcase photos with names</p>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="gal-count-pill" id="galCountPill">0 photos</span>
+      <button class="gal-add-btn" onclick="toggleUploadPanel()">＋ Add Photo</button>
+    </div>
+  </div>
+
+  <!-- Upload panel -->
+  <div class="gal-upload-panel" id="galUploadPanel">
+    <form method="POST" enctype="multipart/form-data" action="" id="galForm">
+      <div class="gal-panel-inner">
+
+        <div class="gal-dropzone" id="galDropzone">
+          <input type="file" name="image" accept="image/*" id="galFileInput" onchange="previewGalImage(this)">
+          <img class="gal-dz-preview" id="galDzPreview" alt="">
+          <span class="gal-dz-change">Change photo</span>
+          <div id="galDzPlaceholder" style="display:flex;flex-direction:column;align-items:center;gap:8px">
+            <div class="gal-dz-icon">📷</div>
+            <div class="gal-dz-text">Click to pick<br>a photo</div>
+            <div class="gal-dz-sub">JPG, PNG, WEBP</div>
+          </div>
+        </div>
+
+        <div class="gal-panel-right">
+          <div>
+            <label class="gal-field-label" for="galNameInput">Photo Name</label>
+            <input class="gal-name-input" type="text" id="galNameInput" name="image_name" placeholder="e.g. Mango Mousse Cake" required>
+          </div>
+          <p class="gal-panel-hint">This name will appear on the photo in the gallery below. Keep it short and appetizing!</p>
+          <div class="gal-panel-actions">
+            <button type="submit" class="gal-btn-save">Save to Gallery</button>
+            <button type="button" class="gal-btn-cancel" onclick="toggleUploadPanel()">Cancel</button>
+          </div>
+        </div>
+
+      </div>
+    </form>
+  </div>
+
+  <!-- Masonry grid -->
+  <div class="gal-masonry" id="galMasonry">
+
+    {% for photo in gallery %}
+    <div class="gal-item">
+      <img src="{{photo.image}}" alt="{{ photo.name }}">
+      <div class="gal-item-overlay">
+        <div class="gal-item-name">{{ photo.name }}</div>
+      </div>
+      <div class="card-actions">
+        <!-- Edit button (left) -->
+        <button class="btn-edit" onclick="openEditModal('{{ photo._id }}', '{{ photo.name }}')">✏️ Edit</button>
+        <!-- Delete button (right) -->
+        <form method="POST" action="{{ url_for('delete_gallery', item_id=photo._id) }}" onsubmit="return confirm('Delete {{ photo.name }}?')">
+          <button type="submit" class="btn-delete">🗑 Delete</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+
+    {% if not gallery %}
+    <div class="gal-empty">
+      <div class="gal-empty-icon">🍰</div>
+      <div class="gal-empty-text">No photos yet</div>
+      <div class="gal-empty-sub">Click "Add Photo" above to upload your first one</div>
+    </div>
+    {% endif %}
+
+  </div>
+
+</div>
+
+<!-- ── Edit Modal ── -->
+<div class="edit-modal-backdrop" id="editModalBackdrop" onclick="closeEditModal(event)">
+  <div class="edit-modal">
+    <h3>✏️ Edit Photo</h3>
+    <form method="POST" enctype="multipart/form-data" id="editForm">
+      <div class="edit-modal-field">
+        <label for="editNameInput">Photo Name</label>
+        <input type="text" id="editNameInput" name="image_name" placeholder="e.g. Mango Mousse Cake" required>
+      </div>
+      <div class="edit-modal-field">
+        <label for="editImageInput">Replace Image <span style="font-weight:400;text-transform:none;color:#aaa">(optional)</span></label>
+        <input type="file" id="editImageInput" name="image" accept="image/*">
+      </div>
+      <div class="edit-modal-actions">
+        <button type="submit" class="edit-modal-save">Save Changes</button>
+        <button type="button" class="edit-modal-cancel" onclick="closeEditModal()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function toggleUploadPanel() {
+    const panel = document.getElementById('galUploadPanel');
+    panel.classList.toggle('open');
+    if (!panel.classList.contains('open')) resetGalPanel();
+  }
+
+  function previewGalImage(input) {
+    if (!input.files || !input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const preview = document.getElementById('galDzPreview');
+      preview.src = e.target.result;
+      preview.classList.add('visible');
+      document.getElementById('galDzPlaceholder').style.display = 'none';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+
+  function resetGalPanel() {
+    document.getElementById('galForm').reset();
+    const preview = document.getElementById('galDzPreview');
+    preview.classList.remove('visible');
+    preview.src = '';
+    document.getElementById('galDzPlaceholder').style.display = 'flex';
+  }
+
+  function openEditModal(id, name) {
+    document.getElementById('editNameInput').value = name;
+    document.getElementById('editForm').action = '/admin/edit_gallery/' + id;
+    document.getElementById('editModalBackdrop').classList.add('open');
+  }
+
+  function closeEditModal(e) {
+    if (!e || e.target === document.getElementById('editModalBackdrop')) {
+      document.getElementById('editModalBackdrop').classList.remove('open');
+      document.getElementById('editForm').reset();
+    }
+  }
+
+  (function() {
+    const count = document.querySelectorAll('.gal-item').length;
+    document.getElementById('galCountPill').textContent = count + (count === 1 ? ' photo' : ' photos');
+  })();
+</script>
+<script>
+  setTimeout(() => {
+    const alert = document.getElementById("successAlert");
+    if (alert) alert.style.display = "none";
+  }, 1000);
+</script>
+</section>
+
+{% endblock %}

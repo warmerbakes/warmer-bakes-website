@@ -1,0 +1,338 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  .success-alert {
+    position: fixed; top: 20px; right: 20px;
+    background: #16a34a; color: white;
+    padding: 12px 18px; border-radius: 8px;
+    font-size: 0.85rem; font-weight: 500;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 1000;
+  }
+  .error-alert {
+    position: fixed; top: 20px; right: 20px;
+    background: #dc2626; color: white;
+    padding: 12px 18px; border-radius: 8px;
+    font-size: 0.85rem; font-weight: 500;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 1000;
+  }
+</style>
+<!-- ── HERO ── -->
+<section class="hero" id="home">
+
+  <div class="floating-area">
+    <img class="fi fi-left"
+         src="https://em-content.zobj.net/source/apple/354/croissant_1f950.png"
+         alt=""
+         onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'fi fi-left',style:'font-size:clamp(2.5rem,6vw,4rem)',textContent:'🥐'}))">
+    <img class="fi fi-top-right"
+         src="https://em-content.zobj.net/source/apple/354/shortcake_1f370.png"
+         alt=""
+         onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'fi fi-right',style:'font-size:clamp(2rem,5vw,3.5rem)',textContent:'🍰'}))">
+    <img class="fi fi-mid-right"
+         src="https://em-content.zobj.net/source/apple/354/doughnut_1f369.png"
+         alt=""
+         onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'fi fi-bottom',style:'font-size:clamp(1.8rem,4.5vw,3rem)',textContent:'🍩'}))">
+
+    <div class="hero-text">
+        <h1 class="hero-title">FRESH, HOMEMADE<br>BAKED WITH LOVE</h1>
+        <a href="/menu" class="btn-viewmenu">VIEW OUR MENU &nbsp;→</a>
+
+        <div class="contact-actions">
+          <a href="tel:+919987761216" class="contact-call-btn">📞 Call Us Now</a>
+          <a href="https://wa.me/919987761216?text=Hi%20I%20came%20across%20your%20website%20and%20had%20a%20question"
+             class="contact-whatsapp-btn" target="_blank">💬 Chat on WhatsApp</a>
+        </div>
+
+    </div>
+  </div>
+
+  <div class="plates-area">
+    <div class="plate plate-lg p-offwhite hide-mobile">
+      <img class="plts" src="/static/images/img22.png">
+    </div>
+    <div class="plate plate-xl p-white">
+      <img class="plts" width="300px" height="300px" src="/static/images/img33.png">
+    </div>
+    <div class="plate plate-xl p-sage">
+      <img class="plts" src="/static/images/img44.png">
+    </div>
+    <div class="plate plate-lg p-cream hide-mobile">
+      <img class="plts" src="/static/images/img55.png">
+    </div>
+  </div>
+
+</section>
+
+<!-- ── WHO WE ARE ── -->
+<section class="who_we_are">
+    <h1 class="who_h1">Who We Are</h1>
+    <div class="who_text">
+        We are a small home kitchen that loves to cook and bake.
+        <span class="inline-img bread"></span>
+        Everything we make comes from old family recipes passed down through generations.
+        <br><br>
+        We make cakes, pies, pickles, and real East Indian food like
+        <span class="inline-img cake"></span>
+        Bottle Masala and Vindaloo — all made fresh, just for you.
+        <br><br>
+        We only make your order when you place it — no stock, no preservatives, no shortcuts.
+        <span class="inline-img pastry"></span>
+        Just good, honest food made with care.
+    </div>
+</section>
+
+<!-- ── WHAT WE OFFER ── -->
+<section id="what_we_make">
+  <header class="header">
+    <h1>What We Make</h1>
+  </header>
+
+  <div class="gallery">
+    {% for category in categories %}
+    <div class="card" data-label="{{category.name}}">
+      <img src="{{category.image}}" alt="{{category.name}}"/>
+      <div class="card-label">{{category.name}}</div>
+    </div>
+    {% endfor %}
+
+  </div>
+</section>
+
+<!-- ── DETAILS SECTION ── -->
+<section class="details">
+  <div class="details-video">
+    <video autoplay muted loop playsinline>
+      <source src="/static/images/vid1.mp4" type="video/mp4">
+    </video>
+    <button class="play-btn" id="playBtn" title="Play / Pause">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 5v14l11-7z"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="details-info">
+    <div class="location-block">
+      <h3>Location</h3>
+      <p>Khotachiwadi , Girgaon</p>
+    </div>
+    <div class="hours-block">
+      <div>
+        <h3>When we're open</h3>
+        <ul class="hours-list">
+          <li class="hours-item">
+            <span class="day">Monday to Thursday</span>
+            <span class="time">07:00 AM – 11:00 PM</span>
+          </li>
+          <li class="hours-item">
+            <span class="day">Friday &amp; Saturday</span>
+            <span class="time">08:00 AM – 09:00 PM</span>
+          </li>
+          <li class="hours-item">
+            <span class="day">Sunday</span>
+            <span class="time">08:00 AM – 06:00 PM</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── MASONRY GALLERY ── -->
+<section class="mg-section"  id="gallery">
+
+  <div class="mg-header">
+    <div class="mg-header-line"></div>
+    <div class="mg-header-center">
+      <span class="mg-tag">✦ Our Gallery ✦</span>
+      <h2 class="mg-title">Made with <em>love</em> every day</h2>
+      <p class="mg-sub">A little look at what comes out of our kitchen</p>
+    </div>
+    <div class="mg-header-line"></div>
+  </div>
+
+  <div class="mg-grid" id="mgGrid">
+
+    {% for photo in gallery %}
+    <div class="mg-item mg-tall" data-delay="0">
+      <img src="{{photo.image}}" alt="{{photo.name}}"/>
+      <div class="mg-overlay"><span>{{photo.name}}</span></div>
+    </div>
+    {% endfor %}
+
+  </div>
+
+  <div class="mg-lightbox" id="mgLightbox">
+    <button class="mg-lb-close" id="mgLbClose">&times;</button>
+    <div class="mg-lb-img-wrap">
+      <img src="" alt="" id="mgLbImg"/>
+    </div>
+    <p class="mg-lb-caption" id="mgLbCaption"></p>
+  </div>
+
+</section>
+
+<!-- ── MARQUEE ── -->
+<section class="marquee-section">
+
+  <div class="marquee-track-wrap">
+    <div class="marquee-track" id="marqueeTrack">
+      {% for photo in gallery %}
+      <div class="marquee-card" style="--r: -4deg"><img src="{{photo.image}}" alt="{{photo.name}}"/></div>
+      {% endfor %}
+      {% for photo in gallery %}
+      <div class="marquee-card" style="--r: -4deg"><img src="{{photo.image}}" alt="{{photo.name}}"/></div>
+      {% endfor %}
+      {% for photo in gallery %}
+      <div class="marquee-card" style="--r: -4deg"><img src="{{photo.image}}" alt="{{photo.name}}"/></div>
+      {% endfor %}
+      
+    </div>
+  </div>
+
+
+</section>
+
+
+<section class="contact-section">
+
+  <!-- Left: Image -->
+  <div class="contact-img">
+  <video autoplay muted loop playsinline>
+    <source src="/static/images/Video Project 1.mp4" type="video/mp4">
+  </video>
+</div>
+
+  <!-- Right: Form -->
+  <div class="contact-form-wrap">
+
+    <h2 class="contact-title">Connect With Us</h2>
+    <p class="contact-desc">
+      Whether you want to place an order, share feedback,
+      or just say hello — we would love to hear from you!
+    </p>
+
+    <form class="contact-form" id="contactForm" method="POST" action="/">
+
+      <div class="form-field">
+        <label for="cf-name">Your Name *</label>
+        <input type="text" name="name" id="cf-name" placeholder="David Marc" required/>
+      </div>
+
+      <div class="form-field">
+        <label for="cf-email">Email Address</label>
+        <input type="email" name="email" id="cf-email" placeholder="xyz@example.com"/>
+      </div>
+
+      <div class="form-field">
+        <label for="cf-phone">Phone Number *</label>
+        <input type="tel" name="phone" id="cf-phone" placeholder="9999999999" required/>
+      </div>
+
+      <div class="form-field">
+        <label for="cf-message">Message *</label>
+        <textarea id="cf-message" name="message" placeholder="Type message here..." rows="5" required></textarea>
+      </div>
+
+      <button type="submit" class="contact-btn">Submit Now</button>
+
+      
+
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+  {% if category == 'success' %}
+  <div class="alert success-alert" id="flashAlert">{{ message }}</div>
+  {% elif category == 'error' %}
+  <div class="alert error-alert" id="flashAlert">{{ message }}</div>
+  {% endif %}
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+    </form>
+
+  </div>
+
+</section>
+
+<script>
+(function () {
+  const header = document.querySelector('.mg-header');
+  const items  = document.querySelectorAll('.mg-item');
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      if (el === header) {
+        el.classList.add('vis');
+      } else {
+        const delay = parseInt(el.dataset.delay) || 0;
+        setTimeout(() => el.classList.add('vis'), delay);
+      }
+      io.unobserve(el);
+    });
+  }, { threshold: 0.1 });
+
+  if (header) io.observe(header);
+  items.forEach(item => io.observe(item));
+
+  items.forEach(item => {
+    item.addEventListener('mousemove', e => {
+      const r = item.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width  - 0.5;
+      const y = (e.clientY - r.top)  / r.height - 0.5;
+      item.style.transform = `perspective(700px) rotateY(${x*7}deg) rotateX(${-y*7}deg) scale(1.03)`;
+    });
+    item.addEventListener('mouseleave', () => {
+      item.style.transform = '';
+    });
+  });
+
+  const lb        = document.getElementById('mgLightbox');
+  const lbImg     = document.getElementById('mgLbImg');
+  const lbCaption = document.getElementById('mgLbCaption');
+  const lbClose   = document.getElementById('mgLbClose');
+
+  items.forEach(item => {
+    item.addEventListener('click', () => {
+      lbImg.src = item.querySelector('img').src;
+      lbCaption.textContent = item.querySelector('.mg-overlay span').textContent;
+      lb.classList.add('active');
+    });
+  });
+
+  lbClose.addEventListener('click', () => lb.classList.remove('active'));
+  lb.addEventListener('click', e => { if (e.target === lb) lb.classList.remove('active'); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') lb.classList.remove('active'); });
+})();
+</script>
+
+<script>
+  const video = document.querySelector('.details-video video');
+  const playBtn = document.getElementById('playBtn');
+
+  playBtn.addEventListener('click', () => {
+    if (video.paused) {
+      video.play();
+      playBtn.style.opacity = '0';
+    } else {
+      video.pause();
+      playBtn.style.opacity = '1';
+    }
+  });
+
+  video.addEventListener('pause', () => { playBtn.style.opacity = '1'; });
+  video.addEventListener('play',  () => { playBtn.style.opacity = '0'; });
+</script>
+<script>
+  setTimeout(() => {
+    document.querySelectorAll(".alert").forEach(a => a.style.display = "none");
+  }, 5000);
+</script>
+</body>
+</html>
+{% endblock %}

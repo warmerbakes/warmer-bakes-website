@@ -1,0 +1,146 @@
+{% extends "admin_base.html" %}
+
+{% block content %}
+<style>
+  .items-wrap {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 24px;
+  }
+  .items-header { margin-bottom: 32px; }
+  .items-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.7rem; font-weight: 700;
+  }
+  .items-header p { color: #999; font-size: 0.83rem; margin-top: 4px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+  }
+
+  .card {
+    border: 1px solid #e8e8e8; border-radius: 12px;
+    overflow: hidden; background: #fff; transition: box-shadow 0.2s;
+  }
+  .card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
+  .card img {
+    width: 100%; height: 180px; object-fit: cover;
+    display: block; background: #f5f5f5;
+  }
+  .card-body { padding: 16px; }
+  .card-body h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem; font-weight: 700; margin-bottom: 10px; line-height: 1.3;
+  }
+
+  /* Size buttons */
+  .size-label {
+    font-size: 0.68rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.06em; color: #aaa; margin-bottom: 6px;
+  }
+  .sizes { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .size-btn {
+    padding: 4px 9px; border: 1px solid #e0e0e0; border-radius: 5px;
+    background: #fff; font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem; color: #555; cursor: pointer; transition: all 0.15s;
+  }
+  .size-btn:hover { border-color: #111; color: #111; }
+  .size-btn.active { background: #111; border-color: #111; color: #fff; }
+
+  /* Price display */
+  .card-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem; font-weight: 700; color: #111; margin-bottom: 2px;
+  }
+  .card-price-request {
+    font-size: 0.82rem; color: #aaa; font-style: italic;
+    font-family: 'DM Sans', sans-serif; margin-bottom: 2px;
+  }
+
+  .card-actions {
+    display: flex; gap: 8px; margin-top: 14px;
+    padding-top: 14px; border-top: 1px solid #f0f0f0;
+  }
+  .btn-edit, .btn-delete {
+    flex: 1; padding: 7px 0; border-radius: 6px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 600;
+    cursor: pointer; text-align: center; text-decoration: none;
+    transition: all 0.15s; border: 1px solid #e0e0e0;
+  }
+  .btn-edit {
+    background: #fff; color: #111;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .btn-edit:hover { background: #111; color: #fff; border-color: #111; }
+  .btn-delete { background: #fff; color: #ef4444; border-color: #fecaca; }
+  .btn-delete:hover { background: #ef4444; color: #fff; border-color: #ef4444; }
+  .card-actions form { flex: 1; display: flex; }
+  .card-actions form .btn-delete { width: 100%; }
+</style>
+
+<div class="items-wrap">
+  <div class="items-header">
+    <h2>Bakery Items</h2>
+    <p>{{ items | length }} product{{ 's' if items | length != 1 }} in catalogue</p>
+  </div>
+
+  <div class="grid">
+    {% for item in items %}
+    <div class="card">
+      <img src="{{item.image}}" alt="{{ item.name }}">
+
+      <div class="card-body">
+        <h3>{{ item.name }}</h3>
+
+        {# ── Only show size buttons if sizes have labels ── #}
+        {% set has_size_labels = item.sizes and (item.sizes | selectattr('size') | list | length > 0) %}
+
+        {% if has_size_labels %}
+          <div class="size-label">Choose Size</div>
+          <div class="sizes">
+            {% for s in item.sizes %}
+            {% if s.size %}
+            <button
+              class="size-btn {% if loop.first %}active{% endif %}"
+              data-price="{{ s.price }}"
+              onclick="changePrice(this, '{{ item._id }}')">
+              {{ s.size }}
+            </button>
+            {% endif %}
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {# ── Price display (single line, no duplication) ── #}
+        {% if item.sizes and item.sizes | length > 0 %}
+          <div class="card-price" id="price-{{ item._id }}">
+            ₹{{ item.sizes[0].price }}
+          </div>
+        {% else %}
+          <div class="card-price-request" id="price-{{ item._id }}">Price on request</div>
+        {% endif %}
+
+        <div class="card-actions">
+          <a href="{{ url_for('admin_edit_item', item_id=item._id) }}" class="btn-edit">Edit</a>
+          <form method="POST" action="{{ url_for('admin_delete_item', item_id=item._id) }}"
+                onsubmit="return confirm('Delete {{ item.name }}?')">
+            <button type="submit" class="btn-delete">Delete</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+function changePrice(button, itemId) {
+  document.getElementById('price-' + itemId).innerText = '₹' + button.getAttribute('data-price');
+  button.parentElement.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+  button.classList.add('active');
+}
+</script>
+
+{% endblock %}

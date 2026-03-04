@@ -1,0 +1,706 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  :root {
+    --cream: #fdf6ed;
+    --warm-white: #fffcf7;
+    --brown-deep: #3b1f0e;
+    --brown-mid: #6b3a1f;
+    --caramel: #c8873d;
+    --caramel-light: #e4b070;
+    --blush: #f0d5b8;
+    --blush-deep: #e0b898;
+    --sage: #8a9e7a;
+    --text: #2c1810;
+    --text-muted: #7a5c4a;
+  }
+
+  /* ── Hide nav items that shouldn't show on menu page ── */
+  .bakzy-nav .nav-group:first-child li:nth-child(2),
+  .bakzy-nav .nav-group:first-child li:nth-child(3) { display: none; }
+  .bakzy-nav .nav-group:last-child li:nth-child(2),
+  .bakzy-nav .nav-group:last-child li:nth-child(3) { display: none; }
+  .mobile-drawer a[href="#what_we_make"],
+  .mobile-drawer a[href="#gallery"],
+  .mobile-drawer a[href="#contact"] { display: none; }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  .menu-wrap {
+    background: var(--warm-white);
+    padding: 3rem 2rem 8rem;
+    min-height: calc(100vh - 56px);
+  }
+
+  .section-header { text-align: center; margin-bottom: 2.5rem; }
+  .section-tag {
+    font-size: 0.75rem; font-weight: 500; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--caramel); margin-bottom: 0.6rem;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem; color: var(--brown-deep); line-height: 1.15;
+  }
+  .section-title em { color: var(--caramel); font-style: italic; }
+  .section-desc {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem; color: var(--text-muted); margin-top: 0.5rem;
+  }
+  .divider {
+    width: 60px; height: 2px;
+    background: linear-gradient(90deg, var(--caramel), var(--caramel-light));
+    margin: 0.75rem auto 0; border-radius: 2px;
+  }
+
+  .category-tabs {
+    display: flex; justify-content: center; gap: 0.6rem;
+    margin-bottom: 2.5rem; flex-wrap: wrap;
+  }
+  .cat-tab {
+    padding: 0.5rem 1.3rem; border-radius: 2rem; border: none;
+    font-family: 'DM Sans', sans-serif; font-size: 0.83rem; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
+    background: var(--blush); color: var(--brown-mid);
+  }
+  .cat-tab:hover, .cat-tab.active { background: var(--brown-deep); color: var(--cream); }
+
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 1.5rem; max-width: 1100px; margin: 0 auto;
+  }
+
+  .product-card {
+    background: white; border-radius: 1.25rem; overflow: hidden;
+    border: 1px solid rgba(228,176,112,0.2);
+    box-shadow: 0 2px 12px rgba(59,31,14,0.07);
+    display: flex; flex-direction: column;
+    transition: transform 0.25s, box-shadow 0.25s;
+  }
+  .product-card:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(59,31,14,0.13); }
+
+  .product-img {
+    height: 175px; overflow: hidden; position: relative;
+    background: linear-gradient(135deg, var(--blush) 0%, var(--caramel-light) 100%);
+    cursor: zoom-in;
+  }
+  .product-img img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform 0.4s ease;
+  }
+  .product-img:hover img { transform: scale(1.05); }
+  .product-img::after {
+    content: '🔍';
+    position: absolute; bottom: 10px; right: 10px;
+    font-size: 0.9rem; background: rgba(59,31,14,0.55); color: white;
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.25s; pointer-events: none;
+    line-height: 28px; text-align: center;
+  }
+  .product-img:hover::after { opacity: 1; }
+
+  .product-badge {
+    position: absolute; top: 12px; right: 12px;
+    background: var(--sage); color: white;
+    font-size: 0.68rem; padding: 0.2rem 0.6rem;
+    border-radius: 1rem; font-weight: 500; font-family: 'DM Sans', sans-serif;
+    pointer-events: none;
+  }
+
+  .product-info { padding: 1.2rem; flex: 1; display: flex; flex-direction: column; }
+  .product-name {
+    font-family: 'Playfair Display', serif; font-size: 1.05rem;
+    font-weight: 600; color: var(--brown-deep); margin-bottom: 10px;
+  }
+
+  .size-label {
+    font-size: 0.68rem; font-weight: 500; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;
+  }
+
+  .size-options { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.85rem; }
+
+  .size-btn {
+    padding: 0.32rem 0.75rem; border-radius: 1.5rem;
+    border: 1.5px solid var(--blush-deep);
+    font-family: 'DM Sans', sans-serif; font-size: 0.76rem; font-weight: 500;
+    color: var(--brown-mid); background: var(--cream);
+    cursor: pointer; transition: all 0.2s;
+  }
+  .size-btn:hover { border-color: var(--caramel); color: var(--caramel); }
+  .size-btn.active { background: var(--brown-deep); border-color: var(--brown-deep); color: white; }
+
+  .selected-price {
+    font-family: 'Playfair Display', serif; font-size: 1.25rem;
+    font-weight: 700; color: var(--caramel); margin-bottom: 12px; min-height: 1.6rem;
+  }
+  .selected-price.price-request {
+    font-size: 0.9rem; font-weight: 500;
+    color: var(--text-muted); font-family: 'DM Sans', sans-serif;
+    font-style: italic;
+  }
+
+  .card-actions {
+    display: flex; align-items: center; gap: 8px;
+    padding-top: 12px; border-top: 1px solid rgba(228,176,112,0.2); margin-top: auto;
+  }
+
+  .qty-control {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--blush); border-radius: 2rem; padding: 4px 8px;
+  }
+  .qty-btn {
+    width: 24px; height: 24px; border-radius: 50%; border: none;
+    background: var(--brown-deep); color: white;
+    font-size: 1rem; line-height: 1; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s; font-family: 'DM Sans', sans-serif;
+  }
+  .qty-btn:hover { background: var(--caramel); }
+  .qty-num {
+    font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+    font-weight: 600; color: var(--brown-deep); min-width: 18px; text-align: center;
+  }
+
+  .btn-add-cart {
+    flex: 1; padding: 9px 0; border-radius: 8px; border: none;
+    font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600;
+    cursor: pointer; background: var(--brown-deep); color: var(--cream);
+    transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 5px;
+  }
+  .btn-add-cart:hover { background: var(--caramel); }
+  .btn-add-cart.added { background: var(--sage); animation: pop 0.3s ease; }
+
+  /* Enquire button style — amber/outlined look */
+  .btn-add-cart.enquire-btn {
+    background: transparent;
+    border: 1.5px solid var(--caramel);
+    color: var(--caramel);
+  }
+  .btn-add-cart.enquire-btn:hover { background: var(--caramel); color: white; }
+  .btn-add-cart.enquire-btn.added { background: var(--sage); border-color: var(--sage); color: white; }
+
+  @keyframes pop {
+    0% { transform: scale(1); } 50% { transform: scale(1.07); } 100% { transform: scale(1); }
+  }
+
+  .empty-state {
+    grid-column: 1 / -1; text-align: center; padding: 4rem 2rem;
+    color: var(--text-muted); font-family: 'Cormorant Garamond', serif; font-size: 1.1rem;
+  }
+
+  /* ═══════ LIGHTBOX ═══════ */
+  .product-lightbox {
+    display: none; position: fixed; inset: 0;
+    background: rgba(20,8,4,0.92); z-index: 9999;
+    align-items: center; justify-content: center; flex-direction: column;
+    gap: 18px; padding: 24px;
+    animation: lbFadeIn 0.3s ease;
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  }
+  .product-lightbox.active { display: flex; }
+  @keyframes lbFadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .lb-img-wrap {
+    max-width: min(600px, 92vw); max-height: 72vh; overflow: hidden;
+    border-radius: 16px;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(228,176,112,0.2);
+    animation: lbZoomIn 0.38s cubic-bezier(0.25,0.46,0.45,0.94);
+  }
+  @keyframes lbZoomIn { from { transform: scale(0.88); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .lb-img-wrap img { width: 100%; max-width: min(600px,92vw); max-height: 72vh; object-fit: contain; display: block; }
+  .lb-info { text-align: center; animation: lbFadeIn 0.5s ease 0.15s both; }
+  .lb-name { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: #f0e2ce; font-weight: 600; margin-bottom: 4px; }
+  .lb-category { font-family: 'DM Sans', sans-serif; font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--caramel-light); opacity: 0.8; }
+  .lb-close {
+    position: absolute; top: 20px; right: 24px;
+    background: rgba(255,255,255,0.1); border: 1.5px solid rgba(255,255,255,0.2);
+    color: #f0e2ce; width: 40px; height: 40px; border-radius: 50%;
+    font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .lb-close:hover { background: rgba(200,135,61,0.35); transform: rotate(90deg) scale(1.1); }
+
+  /* ═══════ CART FAB & DRAWER ═══════ */
+  .cart-fab {
+    position: fixed; bottom: 2rem; right: 2rem;
+    background: var(--brown-deep); color: var(--cream);
+    border: none; border-radius: 50px; padding: 0.85rem 1.5rem;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; gap: 8px;
+    box-shadow: 0 6px 24px rgba(59,31,14,0.28); z-index: 999;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .cart-fab:hover { background: var(--caramel); transform: scale(1.04); }
+  .cart-fab .cart-count {
+    background: #ef4444; color: white; border-radius: 50%;
+    width: 20px; height: 20px; font-size: 0.72rem;
+    display: flex; align-items: center; justify-content: center; font-weight: 700;
+  }
+
+  .drawer-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+    z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  .drawer-overlay.open { opacity: 1; pointer-events: all; }
+
+  .cart-drawer {
+    position: fixed; right: 0; top: 0; bottom: 0;
+    width: min(420px,100vw); background: var(--warm-white);
+    z-index: 1001; transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+    display: flex; flex-direction: column;
+    box-shadow: -8px 0 40px rgba(59,31,14,0.18);
+  }
+  .cart-drawer.open { transform: translateX(0); }
+
+  .drawer-head {
+    padding: 1.5rem; border-bottom: 1px solid var(--blush-deep);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .drawer-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--brown-deep); }
+  .drawer-close { background: none; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; line-height: 1; padding: 2px 6px; border-radius: 4px; transition: color 0.2s; }
+  .drawer-close:hover { color: var(--brown-deep); }
+
+  .drawer-items { flex: 1; overflow-y: auto; padding: 1rem 1.5rem; display: flex; flex-direction: column; gap: 0.85rem; }
+
+  .cart-item {
+    background: white; border-radius: 12px; padding: 0.85rem 1rem;
+    display: flex; align-items: center; gap: 10px;
+    border: 1px solid rgba(228,176,112,0.2);
+    box-shadow: 0 1px 6px rgba(59,31,14,0.05);
+  }
+  .cart-item-info { flex: 1; }
+  .cart-item-name { font-family: 'Playfair Display', serif; font-size: 0.9rem; color: var(--brown-deep); font-weight: 600; }
+  .cart-item-sub { font-family: 'DM Sans', sans-serif; font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+  .cart-item-price { font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 700; color: var(--caramel); }
+
+  /* Enquire badge in cart */
+  .cart-item-price.enquire { font-size: 0.78rem; font-family: 'DM Sans', sans-serif; font-weight: 500; font-style: italic; color: var(--text-muted); }
+
+  .cart-item-remove { background: none; border: none; color: #fca5a5; font-size: 1.1rem; cursor: pointer; padding: 2px; line-height: 1; transition: color 0.2s; }
+  .cart-item-remove:hover { color: #ef4444; }
+
+  .cart-item-qty-control { display: flex; align-items: center; gap: 5px; margin-top: 6px; }
+  .cq-btn {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 1.5px solid var(--blush-deep); background: var(--cream);
+    color: var(--brown-mid); font-size: 0.9rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s; font-family: 'DM Sans', sans-serif;
+  }
+  .cq-btn:hover { background: var(--brown-deep); border-color: var(--brown-deep); color: white; }
+  .cq-num { font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 600; color: var(--brown-deep); min-width: 16px; text-align: center; }
+
+  .cart-empty-msg { text-align: center; padding: 3rem 1rem; font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--text-muted); }
+
+  .drawer-footer { padding: 1.25rem 1.5rem; border-top: 1px solid var(--blush-deep); background: white; }
+  .cart-total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+  .cart-total-label { font-family: 'DM Sans', sans-serif; font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+  .cart-total-amount { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: var(--brown-deep); }
+  .cart-enquire-note { font-family: 'DM Sans', sans-serif; font-size: 0.72rem; color: var(--text-muted); font-style: italic; margin-bottom: 0.75rem; }
+
+  .btn-whatsapp {
+    width: 100%; padding: 0.95rem; border-radius: 12px; border: none;
+    background: #25d366; color: white; font-family: 'DM Sans', sans-serif;
+    font-size: 1rem; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: background 0.2s, transform 0.15s;
+    box-shadow: 0 4px 16px rgba(37,211,102,0.35);
+  }
+  .btn-whatsapp:hover { background: #1ebe5d; transform: translateY(-1px); }
+  .btn-whatsapp:disabled { background: #a7f3d0; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .btn-clear {
+    width: 100%; margin-top: 8px; padding: 0.6rem; border-radius: 8px;
+    border: 1.5px solid var(--blush-deep); background: none;
+    color: var(--text-muted); font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-clear:hover { border-color: #ef4444; color: #ef4444; }
+  .wa-icon { width: 22px; height: 22px; fill: white; flex-shrink: 0; }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<div class="menu-wrap">
+
+  <div class="section-header">
+    <div class="section-tag">Warmer Bakes & Cakes
+
+    </div>
+    <h2 class="section-title">Our <em>Bakery</em> Menu</h2>
+    <p class="section-desc">{{ items | length }} handcrafted product{{ 's' if items | length != 1 }}</p>
+    <div class="divider"></div>
+  </div>
+
+  <div class="category-tabs">
+    <button class="cat-tab active" onclick="filterCat('all', this)">All Items</button>
+    {% for category in categories %}
+    <button class="cat-tab" onclick="filterCat('{{category.name}}', this)">{{category.name}}</button>
+    {% endfor %}
+  </div>
+
+  <div class="products-grid" id="productsGrid">
+    {% for item in items %}
+
+    {# ── Work out the initial price display ── #}
+    {% if item.sizes and item.sizes | length > 0 %}
+      {% set first = item.sizes[0] %}
+      {% set has_price = true %}
+      {% set init_price = first.price %}
+    {% else %}
+      {% set has_price = false %}
+      {% set init_price = '' %}
+    {% endif %}
+
+    <div class="product-card" data-category="{{ item.category }}">
+
+      <div class="product-img"
+           data-img="{{item.image}}"
+           data-name="{{ item.name }}"
+           data-category="{{ item.category }}"
+           onclick="openProductLightbox(this)">
+        <img src="{{item.image}}" alt="{{ item.name }}">
+        <span class="product-badge">{{ item.category | capitalize }}</span>
+      </div>
+
+      <div class="product-info">
+        <div class="product-name">{{ item.name }}</div>
+
+        {# ── Show size buttons only if there are real size labels ── #}
+        {% set has_sizes = item.sizes and item.sizes | selectattr('size') | list | length > 0 %}
+        {% if has_sizes %}
+          <div class="size-label">Choose Size</div>
+          <div class="size-options">
+            {% for s in item.sizes %}
+            {% if s.size %}
+            <button
+              class="size-btn {% if loop.first %}active{% endif %}"
+              data-price="{{ s.price }}"
+              data-size="{{ s.size }}"
+              onclick="changePrice(this, '{{ item._id }}')">
+              {{ s.size }}
+            </button>
+            {% endif %}
+            {% endfor %}
+          </div>
+        {% elif item.sizes and item.sizes | length > 1 %}
+          <div class="size-options">
+            {% for s in item.sizes %}
+            <button
+              class="size-btn {% if loop.first %}active{% endif %}"
+              data-price="{{ s.price }}"
+              data-size=""
+              onclick="changePrice(this, '{{ item._id }}')">
+              ₹{{ s.price }}
+            </button>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {# ── Price display ── #}
+        {% if has_price %}
+          <div class="selected-price" id="price-{{ item._id }}">₹{{ init_price }}</div>
+        {% else %}
+          <div class="selected-price price-request" id="price-{{ item._id }}">Price on request</div>
+        {% endif %}
+
+        <div class="card-actions">
+          <div class="qty-control">
+            <button class="qty-btn" onclick="changeQty('{{ item._id }}', -1)">−</button>
+            <span class="qty-num" id="qty-{{ item._id }}">1</span>
+            <button class="qty-btn" onclick="changeQty('{{ item._id }}', 1)">+</button>
+          </div>
+          {# ── Always enabled; enquire items use isEnquire=true ── #}
+          <button
+            class="btn-add-cart {% if not has_price %}enquire-btn{% endif %}"
+            id="addbtn-{{ item._id }}"
+            data-id="{{ item._id }}"
+            data-name="{{ item.name | e }}"
+            data-enquire="{{ 'true' if not has_price else 'false' }}"
+            onclick="addToCart(this)">
+            {% if has_price %}🛒 Add to Cart{% else %}❓ Enquire{% endif %}
+          </button>
+        </div>
+
+      </div>
+    </div>
+    {% endfor %}
+
+    {% if not items %}
+    <div class="empty-state">No items available yet. Check back soon!</div>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- Floating Cart Button -->
+<button class="cart-fab" onclick="openCart()" id="cartFab" style="display:none">
+  🛒 Cart
+  <span class="cart-count" id="cartCount">0</span>
+</button>
+
+<!-- Overlay -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeCart()"></div>
+
+<!-- Cart Drawer -->
+<div class="cart-drawer" id="cartDrawer">
+  <div class="drawer-head">
+    <span class="drawer-title">🛍 Your Order</span>
+    <button class="drawer-close" onclick="closeCart()">✕</button>
+  </div>
+  <div class="drawer-items" id="drawerItems">
+    <div class="cart-empty-msg">Your cart is empty.<br>Add some delicious items!</div>
+  </div>
+  <div class="drawer-footer">
+    <div class="cart-total-row">
+      <span class="cart-total-label">Total Amount</span>
+      <span class="cart-total-amount" id="cartTotal">₹0</span>
+    </div>
+    <div class="cart-enquire-note" id="enquireNote" style="display:none">
+      * Price on request items will be confirmed via WhatsApp
+    </div>
+    <button class="btn-whatsapp" id="waBtn" onclick="orderViaWhatsapp()" disabled>
+      <svg class="wa-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+      </svg>
+      Order via WhatsApp
+    </button>
+    <button class="btn-clear" onclick="clearCart()">Clear Cart</button>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="product-lightbox" id="productLightbox" onclick="closeLightboxOnBackdrop(event)">
+  <button class="lb-close" onclick="closeProductLightbox()" title="Close">✕</button>
+  <div class="lb-img-wrap">
+    <img id="lbImg" src="" alt="">
+  </div>
+  <div class="lb-info">
+    <div class="lb-name" id="lbName"></div>
+    <div class="lb-category" id="lbCategory"></div>
+  </div>
+</div>
+
+<script>
+  const WHATSAPP_NUMBER = '919987761216';
+  let cart = [];
+
+  /* ─── LIGHTBOX ─── */
+  function openProductLightbox(el) {
+    const src      = el.getAttribute('data-img');
+    const name     = el.getAttribute('data-name');
+    const category = el.getAttribute('data-category');
+    const lb       = document.getElementById('productLightbox');
+    document.getElementById('lbImg').src         = src;
+    document.getElementById('lbImg').alt         = name;
+    document.getElementById('lbName').textContent     = name;
+    document.getElementById('lbCategory').textContent = category.charAt(0).toUpperCase() + category.slice(1);
+    lb.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeProductLightbox() {
+    document.getElementById('productLightbox').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+  function closeLightboxOnBackdrop(event) {
+    if (event.target === document.getElementById('productLightbox')) closeProductLightbox();
+  }
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { closeProductLightbox(); closeCart(); }
+  });
+
+  /* ─── SIZE / PRICE ─── */
+  function changePrice(btn, itemId) {
+    document.getElementById('price-' + itemId).textContent = '₹' + btn.getAttribute('data-price');
+    btn.parentElement.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function changeQty(itemId, delta) {
+    const el  = document.getElementById('qty-' + itemId);
+    let   val = parseInt(el.textContent) + delta;
+    if (val < 1)  val = 1;
+    if (val > 99) val = 99;
+    el.textContent = val;
+  }
+
+  function filterCat(cat, tab) {
+    document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const selectedCat = cat.toLowerCase();
+    document.querySelectorAll('.product-card').forEach(card => {
+      const cardCat = card.dataset.category.toLowerCase();
+      card.style.display = (selectedCat === 'all' || cardCat === selectedCat) ? 'flex' : 'none';
+    });
+  }
+
+  /* ─── ADD TO CART — now supports enquire items (isEnquire = true) ─── */
+  function addToCart(btn) {
+    const itemId    = btn.getAttribute('data-id');
+    const itemName  = btn.getAttribute('data-name');
+    const isEnquire = btn.getAttribute('data-enquire') === 'true';
+    const card      = btn.closest('.product-card');
+
+    let price = null;
+    let size  = '';
+
+    if (!isEnquire) {
+      const sizeBtn = card.querySelector('.size-btn.active');
+      if (sizeBtn) {
+        price = parseInt(sizeBtn.getAttribute('data-price'));
+        size  = sizeBtn.getAttribute('data-size') || '';
+      } else {
+        const priceText = document.getElementById('price-' + itemId).textContent;
+        price = parseInt(priceText.replace('₹', '').trim());
+      }
+      if (!price || isNaN(price)) return;   // safety — shouldn't happen
+    }
+
+    const qty = parseInt(document.getElementById('qty-' + itemId).textContent);
+    const key = itemId + '_' + (size || (isEnquire ? 'enquire' : 'default'));
+    const existing = cart.find(c => c.key === key);
+
+    if (existing) {
+      existing.qty += qty;
+    } else {
+      cart.push({ key, id: itemId, name: itemName, size, price, qty, isEnquire: !!isEnquire });
+    }
+
+    const addBtn = btn;
+    addBtn.textContent = '✓ Added!';
+    addBtn.classList.add('added');
+    setTimeout(() => {
+      addBtn.innerHTML = isEnquire ? '❓ Enquire' : '🛒 Add to Cart';
+      addBtn.classList.remove('added');
+    }, 1200);
+
+    renderCart();
+  }
+
+  /* ─── RENDER CART ─── */
+  function renderCart() {
+    const container  = document.getElementById('drawerItems');
+    const totalEl    = document.getElementById('cartTotal');
+    const countEl    = document.getElementById('cartCount');
+    const waBtn      = document.getElementById('waBtn');
+    const fab        = document.getElementById('cartFab');
+    const noteEl     = document.getElementById('enquireNote');
+
+    if (cart.length === 0) {
+      container.innerHTML = '<div class="cart-empty-msg">Your cart is empty.<br>Add some delicious items!</div>';
+      totalEl.textContent  = '₹0';
+      countEl.textContent  = '0';
+      waBtn.disabled       = true;
+      fab.style.display    = 'none';
+      noteEl.style.display = 'none';
+      return;
+    }
+
+    let total = 0, totalQty = 0, hasEnquire = false, html = '';
+
+    cart.forEach((item, idx) => {
+      const lineTotal = item.price ? item.price * item.qty : null;
+      if (lineTotal) total += lineTotal;
+      if (item.isEnquire) hasEnquire = true;
+      totalQty += item.qty;
+
+      const priceDisplay = item.isEnquire
+        ? `<div class="cart-item-price enquire">Price on request</div>`
+        : `<div class="cart-item-price">₹${lineTotal}</div>`;
+
+      const subLine = item.isEnquire
+        ? 'Enquire for price'
+        : `${item.size ? item.size + ' · ' : ''}₹${item.price} each`;
+
+      html += `
+        <div class="cart-item">
+          <div class="cart-item-info">
+            <div class="cart-item-name">${item.name}</div>
+            <div class="cart-item-sub">${subLine}</div>
+            <div class="cart-item-qty-control">
+              <button class="cq-btn" onclick="cartQtyChange(${idx}, -1)">−</button>
+              <span class="cq-num">${item.qty}</span>
+              <button class="cq-btn" onclick="cartQtyChange(${idx}, 1)">+</button>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+            ${priceDisplay}
+            <button class="cart-item-remove" onclick="removeFromCart(${idx})" title="Remove">🗑</button>
+          </div>
+        </div>`;
+    });
+
+    container.innerHTML      = html;
+    totalEl.textContent      = total > 0 ? '₹' + total + (hasEnquire ? ' +' : '') : 'On request';
+    countEl.textContent      = totalQty;
+    waBtn.disabled           = false;
+    fab.style.display        = 'flex';
+    noteEl.style.display     = hasEnquire ? 'block' : 'none';
+  }
+
+  function cartQtyChange(idx, delta) {
+    cart[idx].qty += delta;
+    if (cart[idx].qty < 1) cart.splice(idx, 1);
+    renderCart();
+  }
+
+  function removeFromCart(idx) {
+    cart.splice(idx, 1);
+    renderCart();
+  }
+
+  function clearCart() {
+    if (!cart.length) return;
+    if (confirm('Clear your entire cart?')) { cart = []; renderCart(); closeCart(); }
+  }
+
+  function openCart() {
+    document.getElementById('cartDrawer').classList.add('open');
+    document.getElementById('drawerOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeCart() {
+    document.getElementById('cartDrawer').classList.remove('open');
+    document.getElementById('drawerOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  /* ─── WHATSAPP ORDER — handles enquire items gracefully ─── */
+  function orderViaWhatsapp() {
+    if (!cart.length) return;
+
+    let msg   = '*New Order from Warmer Bakes & Cakes!*\n\n';
+    let total = 0;
+    let hasEnquire = false;
+
+    cart.forEach((item, i) => {
+      const sizeStr = item.size ? ` (${item.size})` : '';
+      if (item.isEnquire) {
+        hasEnquire = true;
+        msg += `${i + 1}. *${item.name}*${sizeStr}\n`;
+        msg += `   Qty: ${item.qty}  ×  _Price on request_\n\n`;
+      } else {
+        const lineTotal = item.price * item.qty;
+        total += lineTotal;
+        msg += `${i + 1}. *${item.name}*${sizeStr}\n`;
+        msg += `   Qty: ${item.qty}  ×  ₹${item.price} = ₹${lineTotal}\n\n`;
+      }
+    });
+
+    msg += `─────────────────\n`;
+    if (total > 0) msg += `*Subtotal: ₹${total}*\n`;
+    if (hasEnquire) msg += `_Some items are price on request — please confirm pricing._\n`;
+    msg += `\nPlease confirm my order. Thank you!`;
+
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+    cart = [];
+    renderCart();
+    closeCart();
+  }
+</script>
+
+{% endblock %}
