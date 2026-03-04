@@ -334,10 +334,11 @@ def add_new_category():
             if not category_name:
                 flash("Category name is required.", "error")
                 return redirect(url_for('add_new_category'))
-            category_doc = {"name": category_name}
             image_url = safe_save_image(request.files.get('image'))
-            if image_url:
-                category_doc["image"] = image_url
+            if not image_url:
+                flash("Category image is required.", "error")
+                return redirect(url_for('add_new_category'))
+            category_doc = {"name": category_name, "image": image_url}
             collection_categories.insert_one(category_doc)
             flash("Category added successfully!", "success")
         except Exception as e:
