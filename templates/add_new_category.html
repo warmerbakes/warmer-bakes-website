@@ -268,7 +268,7 @@
     <form method="POST" enctype="multipart/form-data" action="{{ url_for('add_new_category') }}" id="galForm">
       <div class="gal-panel-inner">
         <div class="gal-dropzone" id="galDropzone">
-          <input type="file" name="image" accept="image/*" id="galFileInput" onchange="previewGalImage(this)">
+          <input type="file" name="image" accept="image/*" id="galFileInput" onchange="previewGalImage(this)" required>
           <img class="gal-dz-preview" id="galDzPreview" alt="">
           <span class="gal-dz-change">Change photo</span>
           <div id="galDzPlaceholder" style="display:flex;flex-direction:column;align-items:center;gap:8px">
@@ -403,4 +403,5 @@
   }, 5000);
 </script>
 </section>
+
 {% endblock %}
