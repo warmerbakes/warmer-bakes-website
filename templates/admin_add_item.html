@@ -179,17 +179,9 @@
 
     <div class="form-group">
       <label>Category</label>
-      <select name="category">
-        <option value="cakes">Cakes</option>
-        <option value="cookies">Cookies</option>
-        <option value="breads">Breads</option>
-        <option value="festive">Festive</option>
-        <option value="desserts">Desserts</option>
-        <option value="bakes">Bakes</option>
-        <option value="pickles">Pickles</option>
-        <option value="east indian">East Indian</option>
-        <option value="appetizers">Appetizers</option>
-        <option value="dips">Dips</option>
+      <select name="category"> {% for category in categories %}
+        <option value="cakes">{{category.name}}</option>
+        {% endfor %}
       </select>
     </div>
 
@@ -256,4 +248,5 @@ function addSize() {
     document.querySelectorAll(".alert").forEach(a => a.style.display = "none");
   }, 5000);
 </script>
+
 {% endblock %}
