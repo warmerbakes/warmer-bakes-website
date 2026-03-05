@@ -320,6 +320,48 @@
   }
   .btn-clear:hover { border-color: #ef4444; color: #ef4444; }
   .wa-icon { width: 22px; height: 22px; fill: white; flex-shrink: 0; }
+  /* ── Search Bar ── */
+.search-wrap {
+  max-width: 480px;
+  margin: 0 auto 2rem;
+  position: relative;
+}
+.search-input {
+  width: 100%;
+  padding: 0.75rem 1.2rem 0.75rem 3rem;
+  border-radius: 2rem;
+  border: 1.5px solid var(--blush-deep);
+  background: white;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(59,31,14,0.06);
+}
+.search-input:focus {
+  border-color: var(--caramel);
+  box-shadow: 0 2px 16px rgba(200,135,61,0.15);
+}
+.search-icon {
+  position: absolute;
+  left: 1rem; top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  pointer-events: none;
+  opacity: 0.5;
+}
+.search-clear {
+  position: absolute;
+  right: 1rem; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none;
+  font-size: 1rem; color: var(--text-muted);
+  cursor: pointer; opacity: 0.5;
+  display: none;
+  transition: opacity 0.2s;
+}
+.search-clear:hover { opacity: 1; }
 </style>
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -334,6 +376,17 @@
     <p class="section-desc">{{ items | length }} handcrafted product{{ 's' if items | length != 1 }}</p>
     <div class="divider"></div>
   </div>
+  <div class="search-wrap">
+  <span class="search-icon">🔍</span>
+  <input
+    class="search-input"
+    id="searchInput"
+    type="text"
+    placeholder="Search cakes, pastries…"
+    oninput="handleSearch(this)"
+  >
+  <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+</div>
 
   <div class="category-tabs">
     <button class="cat-tab active" onclick="filterCat('all', this)">All Items</button>
@@ -703,4 +756,31 @@
   }
 </script>
 
+<script>
+  /* ─── SEARCH ─── */
+function handleSearch(input) {
+  const query     = input.value.trim().toLowerCase();
+  const clearBtn  = document.getElementById('searchClear');
+  clearBtn.style.display = query ? 'block' : 'none';
+
+  // Reset category tabs to "All" visually
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('.cat-tab').classList.add('active');
+
+  document.querySelectorAll('.product-card').forEach(card => {
+    const name = card.querySelector('.product-name').textContent.toLowerCase();
+    const cat  = card.dataset.category.toLowerCase();
+    card.style.display = (!query || name.includes(query) || cat.includes(query)) ? 'flex' : 'none';
+  });
+}
+
+function clearSearch() {
+  const input = document.getElementById('searchInput');
+  input.value = '';
+  document.getElementById('searchClear').style.display = 'none';
+  document.querySelectorAll('.product-card').forEach(c => c.style.display = 'flex');
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('.cat-tab').classList.add('active');
+}
+</script>
 {% endblock %}
