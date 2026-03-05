@@ -245,8 +245,9 @@ def admin_add_item():
         except Exception as e:
             print(f"[ADD ITEM ERROR] {e}")
             flash("Something went wrong while adding the item.", "error")
-
-    return render_template("admin_add_item.html")
+    categories = list(collection_categories.find())
+    categories = sorted(categories, key=lambda x: x['name'])
+    return render_template("admin_add_item.html", categories=categories)
 
 
 @app.route("/view_items")
@@ -433,3 +434,4 @@ def server_error(e):
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
+
