@@ -25,6 +25,7 @@ try:
     collection_gallery = db['gallery']
     collection_categories = db['category']
     collection_contact=db['contact_us']
+    collection_reviews = db['reviews']
     print("[DB] Connected to MongoDB successfully.")
 except Exception as e:
     print(f"[DB ERROR] Could not connect to MongoDB: {e}")
