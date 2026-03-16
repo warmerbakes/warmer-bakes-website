@@ -8,6 +8,7 @@ import cloudinary
 import cloudinary.uploader
 from dotenv import load_dotenv
 from datetime import datetime
+from flask import jsonify
 
 load_dotenv(override=True)
 
@@ -84,33 +85,95 @@ def safe_object_id(id_str):
 
 # ── Public routes ───────────────────────────────────────────
 
-@app.route("/",methods=["GET","POST"])
+@app.route("/", methods=["GET", "POST"])
 def index():
     try:
         gallery = list(collection_gallery.find())
         categories = list(collection_categories.find())
-        if request.method=='POST':
-            name=request.form.get("name").strip()
-            email=request.form.get("email").strip()
-            phone=request.form.get("phone").strip()
-            message=request.form.get("message").strip()
+        reviews = list(collection_reviews.find().sort("date", -1))
 
-            if name and phone and message:
-                collection_contact.insert_one({
-                    "name": name,
-                    "email": email,
-                    "phone": phone,
-                    "message": message,
-                    "date": datetime.now()
-                })
-                flash("Message sent! We will get back to you soon.", "success")
-            else:
-                flash("Please fill all required fields.", "error")
+        if request.method == 'POST':
+            form_type = request.form.get("form_type")
 
-    except Exception:
+            # ── Contact form ──
+            if form_type == "contact":
+                name = request.form.get("name", "").strip()
+                email = request.form.get("email", "").strip()
+                phone = request.form.get("phone", "").strip()
+                message = request.form.get("message", "").strip()
+
+                if name and phone and message:
+                    collection_contact.insert_one({
+                        "name": name,
+                        "email": email,
+                        "phone": phone,
+                        "message": message,
+                        "date": datetime.now()
+                    })
+                    flash("Message sent! We will get back to you soon.", "success")
+                else:
+                    flash("Please fill all required fields.", "error")
+
+            # ── Review form ──
+            elif form_type == "review":
+                rv_name = request.form.get("rv_name", "").strip()
+                rv_message = request.form.get("rv_message", "").strip()
+                rv_rating = int(request.form.get("rv_rating", 0))
+
+                if rv_name and rv_message and rv_rating > 0:
+                    collection_reviews.insert_one({
+                        "name": rv_name,
+                        "message": rv_message,
+                        "rating": rv_rating,
+                        "date": datetime.now().strftime("%B %Y")
+                    })
+                    flash("Thank you for your review!", "review_success")
+                else:
+                    flash("Please fill all fields and select a star rating.", "review_error")
+
+    except Exception as e:
+        print(f"[INDEX ERROR] {e}")
         gallery = []
-        categories = []  
-    return render_template("home.html", gallery=gallery, categories=categories)
+        categories = []
+        reviews = []
+
+    return render_template("home.html", gallery=gallery, categories=categories, reviews=reviews)
+
+
+@app.route("/submit_review", methods=["POST"])
+def submit_review():
+    try:
+        data = request.get_json()
+        rv_name = data.get("name", "").strip()
+        rv_message = data.get("message", "").strip()
+        rv_rating = int(data.get("rating", 0))
+
+        if rv_name and rv_message and rv_rating > 0:
+            date_str = datetime.now().strftime("%B %Y")
+            result = collection_reviews.insert_one({
+                "name": rv_name,
+                "message": rv_message,
+                "rating": rv_rating,
+                "date": date_str
+            })
+            return jsonify({"success": True, "date": date_str, "id": str(result.inserted_id)})
+        else:
+            return jsonify({"success": False})
+    except Exception as e:
+        print(f"[REVIEW ERROR] {e}")
+        return jsonify({"success": False})
+
+@app.route("/delete_review/<review_id>", methods=["POST"])
+def delete_review(review_id):
+    try:
+        oid = safe_object_id(review_id)
+        if not oid:
+            return jsonify({"success": False})
+        collection_reviews.delete_one({"_id": oid})
+        return jsonify({"success": True})
+    except Exception as e:
+        print(f"[DELETE REVIEW ERROR] {e}")
+        return jsonify({"success": False})
 
 
 @app.route("/menu")
