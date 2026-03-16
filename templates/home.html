@@ -195,6 +195,68 @@
 </section>
 
 
+<!-- ── REVIEWS SECTION ── -->
+<section class="rv-section" id="reviews">
+  <div class="rv-header">
+    <h2 class="rv-title">What Our Customers Say</h2>
+    <p class="rv-subtitle">Every kind word means the world to our little kitchen</p>
+  </div>
+
+  <div class="rv-wrap">
+
+    <!-- LEFT: Review Form -->
+    <div class="rv-form-box">
+      <h3>Leave a Review</h3>
+
+      <div class="rv-stars" id="starRow">
+        <span class="rv-star" data-v="1">&#9733;</span>
+        <span class="rv-star" data-v="2">&#9733;</span>
+        <span class="rv-star" data-v="3">&#9733;</span>
+        <span class="rv-star" data-v="4">&#9733;</span>
+        <span class="rv-star" data-v="5">&#9733;</span>
+      </div>
+
+      <div class="rv-field">
+        <label>Your Name *</label>
+        <input type="text" id="rv_name" placeholder="Maria D'Souza" />
+      </div>
+
+      <div class="rv-field">
+        <label>Your Review *</label>
+        <textarea id="rv_message" rows="4" placeholder="Tell us about your experience..."></textarea>
+      </div>
+
+      <button type="button" class="rv-btn" id="rv_submit_btn">Submit Review</button>
+      <div id="rv-success" style="display:none; margin-top:12px; background:rgba(187,105,51,0.12); border:1px solid #bb6933; color:#7a3d10; border-radius:6px; padding:10px; text-align:center; font-size:0.88rem;">
+        Thank you for your review! 🎉
+      </div>
+      <div id="rv-error" style="display:none; margin-top:12px; background:rgba(220,38,38,0.1); border:1px solid #dc2626; color:#7f1d1d; border-radius:6px; padding:10px; text-align:center; font-size:0.88rem;">
+        Please fill all fields and select a star rating!
+      </div>
+    </div>
+
+    <!-- RIGHT: Review Cards -->
+    <div class="rv-cards-box" id="reviewsList">
+
+      {% for review in reviews %}
+<div class="rv-card" id="card-{{ review._id }}">
+  <div class="rv-card-top">
+    <span class="rv-card-name">{{ review.name }}</span>
+    <span class="rv-card-stars">
+      {% for i in range(review.rating) %}★{% endfor %}{% for i in range(5 - review.rating) %}☆{% endfor %}
+    </span>
+  </div>
+  <p class="rv-card-msg">{{ review.message }}</p>
+  <div class="rv-card-bottom">
+    <span class="rv-card-date">{{ review.date }}</span>
+    <button class="rv-delete-btn" onclick="deleteReview('{{ review._id }}', this)">🗑 Delete</button>
+  </div>
+</div>
+{% endfor %}
+
+    </div>
+  </div>
+</section>
 <section class="contact-section">
 
   <!-- Left: Image -->
@@ -333,6 +395,103 @@
     document.querySelectorAll(".alert").forEach(a => a.style.display = "none");
   }, 5000);
 </script>
-</body>
-</html>
+<script>
+  var rating = 0;
+  var stars = document.querySelectorAll('.rv-star');
+
+  stars.forEach(function(s) {
+    s.addEventListener('mouseover', function() {
+      var v = +this.dataset.v;
+      stars.forEach(function(x) { x.classList.toggle('active', +x.dataset.v <= v); });
+    });
+    s.addEventListener('mouseout', function() {
+      stars.forEach(function(x) { x.classList.toggle('active', +x.dataset.v <= rating); });
+    });
+    s.addEventListener('click', function() {
+      rating = +this.dataset.v;
+      stars.forEach(function(x) { x.classList.toggle('active', +x.dataset.v <= rating); });
+    });
+  });
+
+  document.getElementById('rv_submit_btn').addEventListener('click', function() {
+    var name = document.getElementById('rv_name').value.trim();
+    var message = document.getElementById('rv_message').value.trim();
+    var successBox = document.getElementById('rv-success');
+    var errorBox = document.getElementById('rv-error');
+
+    successBox.style.display = 'none';
+    errorBox.style.display = 'none';
+
+    if (!name || !message || rating === 0) {
+      errorBox.style.display = 'block';
+      return;
+    }
+
+    // Send to Flask via AJAX
+    fetch('/submit_review', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name, message: message, rating: rating })
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.success) {
+        // Build star string
+        var filled = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+
+        // Create new card and inject at TOP of list
+        var card = document.createElement('div');
+        card.className = 'rv-card';
+        card.style.border = '1.5px solid #bb6933'; // highlight new review
+        card.innerHTML =
+          '<div class="rv-card-top">' +
+            '<span class="rv-card-name">' + name + '</span>' +
+            '<span class="rv-card-stars">' + filled + '</span>' +
+          '</div>' +
+          // NAYA
+'<p class="rv-card-msg">' + message + '</p>' +
+'<div class="rv-card-bottom">' +
+  '<span class="rv-card-date">' + data.date + '</span>' +
+  '<button class="rv-delete-btn" onclick="deleteReview(\'' + data.id + '\', this)">🗑 Delete</button>' +
+'</div>';
+
+card.id = 'card-' + data.id;
+
+var list = document.getElementById('reviewsList');
+        list.insertBefore(card, list.firstChild);
+
+        // Reset form
+        document.getElementById('rv_name').value = '';
+        document.getElementById('rv_message').value = '';
+        rating = 0;
+        stars.forEach(function(x) { x.classList.remove('active'); });
+
+        successBox.style.display = 'block';
+        setTimeout(function() { successBox.style.display = 'none'; }, 4000);
+
+        // Remove highlight after 3 sec
+        setTimeout(function() { card.style.border = '1.5px solid #d4c4b0'; }, 3000);
+      }
+    })
+    .catch(function() {
+      errorBox.textContent = 'Something went wrong. Please try again.';
+      errorBox.style.display = 'block';
+    });
+  });
+</script>
+<script>
+function deleteReview(id, btn) {
+  if (!confirm('Delete this review?')) return;
+  fetch('/delete_review/' + id, { method: 'POST' })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    if (data.success) {
+      var card = document.getElementById('card-' + id);
+      card.style.transition = 'opacity 0.4s';
+      card.style.opacity = '0';
+      setTimeout(function() { card.remove(); }, 400);
+    }
+  });
+}
+</script>
 {% endblock %}
